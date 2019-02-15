@@ -1,13 +1,13 @@
 FROM ubuntu:trusty
 
-# we want bash
+# we want bash as shell
 SHELL ["/bin/bash", "-c"]
 
 WORKDIR "/home"
 
 # some basic tools needed
 RUN sudo apt-get update
-RUN sudo apt-get install -y curl git build-essential
+RUN sudo apt-get install -y curl git
 
 # get vscodium repo
 RUN ["git", "clone", "https://github.com/vscodium/vscodium.git"]
@@ -26,11 +26,10 @@ RUN mkdir -p /usr/local/nvm \
 RUN source $NVM_DIR/nvm.sh \
   && curl -o- -L https://yarnpkg.com/install.sh | bash
 
-# install deps
-RUN sudo dpkg --add-architecture i386
-RUN sudo apt-get update
-RUN sudo apt-get install -y fakeroot rpm jq
-RUN sudo apt-get install -y libx11-dev:i386 libxkbfile-dev:i386 libsecret-1-dev:i386 libc6-dev-i386 gcc-multilib g++-multilib
+# run install deps
+RUN export BUILDARCH=ia32 && ./install_deps.sh
+# apt removes build-essential after this for some reason
+RUN sudo apt-get install -y build-essential
 
 # set flags
 ENV CFLAGS=-m32
